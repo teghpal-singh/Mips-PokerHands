@@ -1,0 +1,423 @@
+# Teghpal Singh
+# TEGSINGH
+# 112224062
+
+.data
+# Command-line arguments
+num_args: .word 0
+addr_arg0: .word 0
+addr_arg1: .word 0
+no_args: .asciiz "You must provide at least one command-line argument.\n"
+
+# Error messages
+invalid_operation_error: .asciiz "INVALID_OPERATION\n"
+invalid_args_error: .asciiz "INVALID_ARGS\n"
+
+# Output strings
+royal_flush_str: .asciiz "ROYAL_FLUSH\n"
+straight_flush_str: .asciiz "STRAIGHT_FLUSH\n"
+four_of_a_kind_str: .asciiz "FOUR_OF_A_KIND\n"
+full_house_str: .asciiz "FULL_HOUSE\n"
+simple_flush_str: .asciiz "SIMPLE_FLUSH\n"
+simple_straight_str: .asciiz "SIMPLE_STRAIGHT\n"
+high_card_str: .asciiz "HIGH_CARD\n"
+
+zero_str: .asciiz "ZERO\n"
+neg_infinity_str: .asciiz "-INF\n"
+pos_infinity_str: .asciiz "+INF\n"
+NaN_str: .asciiz "NAN\n"
+floating_point_str: .asciiz "_2*2^"
+
+# Put your additional .data declarations here, if any.
+new_line_str: .asciiz "\n"
+
+# Main program starts here
+.text
+.globl main
+main:
+    # Do not modify any of the code before the label named "start_coding_here"
+    # Begin: save command-line arguments to main memory
+    sw $a0, num_args
+    beqz $a0, zero_args
+    li $t0, 1
+    beq $a0, $t0, one_arg
+two_args:
+    lw $t0, 4($a1)
+    sw $t0, addr_arg1
+one_arg:
+    lw $t0, 0($a1)
+    sw $t0, addr_arg0
+    j start_coding_here
+zero_args:
+    la $a0, no_args
+    li $v0, 4
+    syscall
+    j exit
+    # End: save command-line arguments to main memory
+
+start_coding_here:
+    # Start the assignment by writing your code here
+    li $t0, 0 #$t0 is initialized to 0
+    li $t1, 0 #$t1 is initialized to 0
+    li $t2, 0 #$t2 is initialized to 0
+    li $t3, '\0' #$t3 is initialized to null pointer
+    li $t4, 70 #$t4 is initialized to 'F'
+    li $t5, 77 #$t5 is initialized to 'M'
+    li $t6, 80 #$t6 is initialized to 'P'
+    
+    lw $t0, addr_arg0 #$t0 contains the string of the first argument
+    lbu $t1, 0($t0) #$t1 contains the first character of the first argument
+    lbu $t2, 1($t0) #$t2 contains the second character of the first argument
+    
+    bne $t2, $t3, throw_operation_error #if $t2 is not a null pointer, throw the operation error
+    bne $t1, $t4, check_if_first_arg_is_M #if the first character is not 'F', check if it is 'M'
+    j first_arg_is_F #otherwise, it is 'F', so jump to first_arg_is_F
+
+check_if_first_arg_is_M:
+		bne $t1, $t5, check_if_first_arg_is_P  #if the first character is not 'M', check if it is 'P'
+    j first_arg_is_M #otherwise, it is 'M', so jump to first_arg_is_M
+
+check_if_first_arg_is_P:
+		bne $t1, $t6, throw_operation_error #if the first character is not 'P', throw the operation error
+    j first_arg_is_P #otherwise, it is 'P', so jump to first_arg_is_P
+		
+first_arg_is_F:
+		#Prints the first argument
+		#li $v0, 11
+		#move $a0, $t1
+		#syscall
+		
+		lw $t0, num_args #$t0 now contains the number of arguments in total
+		li $t1, 2 #$t1 now contains number 2
+		bne $t0, $t1, throw_argument_error #if the number of args is not 2, throw the argument error
+		
+		lw $t0, addr_arg1 #$t0 contains the string of the second argument
+    lbu $t1, 0($t0) #$t1 contains the first character of the second argument
+		li $t2, 57 #$t2 contains the ascii value of 57, in this case, number 9
+		li $t4, 70 #$t4 contains the ascii value of 70, in this case, 'F'
+		li $t5, '\0' #$t5 is initialized to null pointer
+		li $t6, 48 #$t6 contains the ascii value of 48, in this case, number 0
+    li $t7, 65 #$t7 contains the ascii value of 65, in this case, 'A'
+    li $t8, 0
+    li $t9, 4
+    
+    #This loop converts every char in second args to a binary where $t3 is containing this
+F_start_loop_again_to_convert_next_char_to_binary:
+		addi $t8, $t8, 1
+		#bne $t8, $t9, throw_argument_error 
+
+		bgt $t1 $t4,throw_argument_error
+		blt $t1, $t6, throw_argument_error
+		blt $t1, $t7, F_check_if_its_greater_than_57
+		j skip_check_if_its_greater_than_57
+		
+F_check_if_its_greater_than_57:
+		bgt $t1, $t2, throw_argument_error
+
+skip_check_if_its_greater_than_57:
+    bgt $t1, $t2, F_subtract_the_ascii_value_from_55
+    j F_subtract_the_ascii_value_from_48
+    
+F_subtract_the_ascii_value_from_55:
+		addi $t1, $t1, -55
+		j F_skip_subtracting_from_48_if_ascii_is_a_character
+		
+F_subtract_the_ascii_value_from_48:
+		addi $t1, $t1, -48
+		
+F_skip_subtracting_from_48_if_ascii_is_a_character:
+		add $t3, $t3, $t1
+		addi, $t0, $t0, 1
+		lbu $t1, 0($t0) #$t1 now contains the next character of the second argument
+		bne $t1, $t5, F_shift_4_bits_to_the_left
+		j F_do_not_shift_4_bits_to_the_left #Prevents an extra shift of 4 bits when the loop is at the last char
+		
+F_shift_4_bits_to_the_left:
+		sll $t3, $t3, 4
+		
+F_do_not_shift_4_bits_to_the_left:
+		
+		bne $t1, $t5, F_start_loop_again_to_convert_next_char_to_binary
+
+		bne $t8, $t9, throw_argument_error
+
+		#Uncomment to check if the second argument converted to binary is correct decimal
+		#li $v0, 1
+		#move $a0, $t3
+		#syscall
+    
+    li $t0, 0x8000
+    and $t0, $t0, $t3
+    srl $t0, $t0, 15 #$t0 contains the sign bit
+		
+		li $t1, 0x7C00
+    and $t1, $t1, $t3
+    srl $t1, $t1, 10 #$t1 contains the exponent bits
+    addi $t1, $t1, -15
+		
+    li $t2, 0x03FF
+    and $t2, $t2, $t3 #$t2 contains the fraction bits
+    
+    li $t4, 16
+    li $t5, 0
+    li $t6, -15
+    
+    beq $t1, $t4, F_check_if_the_fraction_is_greater_than_0 #if the exponent bits are all 1's
+		beq $t1, $t6, F_check_if_the_fraction_is_0 #if exponent is all 0's
+		j F_bits_are_valid
+		
+F_check_if_the_fraction_is_greater_than_0:
+		bgt $t2, $t5, throw_NaN_error
+		j F_check_if_its_neg_or_pos_infinity
+
+F_check_if_its_neg_or_pos_infinity:
+		beq $t0, $t5, throw_pos_infinity_error
+		j throw_neg_infinity_error
+	
+F_bits_are_finite_and_a_number:
+		beq $t1, $t5, F_check_if_the_fraction_is_0
+		j F_bits_are_valid
+		
+F_check_if_the_fraction_is_0:
+		beq $t2, $t5, throw_zero_error
+		j F_bits_are_valid
+
+F_bits_are_valid:
+		bne $t0, $t5, F_print_out_a_negative_sign
+		j skip_F_print_out_a_negative_sign
+		
+F_print_out_a_negative_sign:
+		li $t6, '-'
+		li $v0, 11
+		move $a0, $t6
+		syscall
+		
+skip_F_print_out_a_negative_sign:
+		li $t6, 1
+		li $v0, 1
+		move $a0, $t6
+		syscall
+		
+		li $t6, '.'
+		li $v0, 11
+		move $a0, $t6
+		syscall
+		
+		li $t4, 0x200
+		and $t4, $t4, $t2
+		srl $t4, $t4, 9
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x100
+		and $t4, $t4, $t2
+		srl $t4, $t4, 8
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x080
+		and $t4, $t4, $t2
+		srl $t4, $t4, 7
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x040
+		and $t4, $t4, $t2
+		srl $t4, $t4, 6
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x020
+		and $t4, $t4, $t2
+		srl $t4, $t4, 5
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x010
+		and $t4, $t4, $t2
+		srl $t4, $t4, 4
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x008
+		and $t4, $t4, $t2
+		srl $t4, $t4, 3
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x004
+		and $t4, $t4, $t2
+		srl $t4, $t4, 2
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x002
+		and $t4, $t4, $t2
+		srl $t4, $t4, 1
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		li $t4, 0x001
+		and $t4, $t4, $t2
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		
+		la $t6, floating_point_str
+		li $v0, 4
+		move $a0, $t6
+		syscall
+		
+		li $v0, 1
+		move $a0, $t1
+		syscall
+		
+		li $v0, 4
+		la $a0, new_line_str
+		syscall
+		j exit
+		
+first_arg_is_M:
+		#This comment just outputs 'M'- just testing
+		#li $v0, 11
+		#move $a0, $t1
+		#syscall
+		
+		lw $t0, num_args #$t0 now contains the number of arguments in total
+		li $t1, 2 #$t1 now contains number 2
+		li $t3, 0 #$t3 is now initialized to 0, this will hold the 32 bits of binary
+		bne $t0, $t1, throw_argument_error #if the number of args is not 2, throw the argument error
+		
+		lw $t0, addr_arg1 #$t0 contains the string of the second argument
+    lbu $t1, 0($t0) #$t1 contains the first character of the second argument
+    li $t2, 57 #$t2 contains the ascii value of 57, in this case, number 9
+    li $t5, '\0' #$t5 is initialized to null pointer
+    
+    #This loop converts every char in second args to a binary where $t3 is containing this
+M_start_loop_again_to_convert_next_char_to_binary:
+    bgt $t1, $t2, M_subtract_the_ascii_value_from_55
+    j M_subtract_the_ascii_value_from_48
+    
+M_subtract_the_ascii_value_from_55:
+		addi $t1, $t1, -55
+		j M_skip_subtracting_from_48_if_ascii_is_a_character
+		
+M_subtract_the_ascii_value_from_48:
+		addi $t1, $t1, -48
+		
+M_skip_subtracting_from_48_if_ascii_is_a_character:
+		add $t3, $t3, $t1
+		addi, $t0, $t0, 1
+		lbu $t1, 0($t0) #$t1 now contains the next character of the second argument
+		bne $t1, $t5, M_shift_4_bits_to_the_left
+		j M_do_not_shift_4_bits_to_the_left #Prevents an extra shift of 4 bits when the loop is at the last char
+		
+M_shift_4_bits_to_the_left:
+		sll $t3, $t3, 4
+		
+M_do_not_shift_4_bits_to_the_left:
+		
+		bne $t1, $t5, M_start_loop_again_to_convert_next_char_to_binary
+		
+		#Uncomment to check if the second argument converted to binary is correct decimal
+		#li $v0, 1
+		#move $a0, $t3
+		#syscall
+		
+		li $t7, 32
+		li $t8, '\n'
+		li $t9, 0
+		
+		li $t0, 0xFC000000
+		and $t0, $t0, $t3
+		srl $t0, $t0, 26
+		
+		bne $t0, $t9, throw_argument_error
+		
+		li $v0, 1
+		move $a0, $t0
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $t1, 0x03E00000
+		and $t1, $t1, $t3
+		srl $t1, $t1, 21
+		
+		li $v0, 1
+		move $a0, $t1
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $t2, 0x001F0000
+		and $t2, $t2, $t3
+		srl $t2, $t2, 16
+		
+		li $v0, 1
+		move $a0, $t2
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $t4, 0x0000F800
+		and $t4, $t4, $t3
+		srl $t4, $t4, 11
+		
+		li $v0, 1
+		move $a0, $t4
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $t5, 0x000007C0
+		and $t5, $t5, $t3
+		srl $t5, $t5, 6
+		
+		li $v0, 1
+		move $a0, $t5
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $t6, 0x0000003F
+		and $t6, $t6, $t3
+		
+		li $v0, 1
+		move $a0, $t6
+		syscall
+		li $v0, 11
+		move $a0, $t7
+		syscall
+		
+		li $v0, 11
+		move $a0, $t8
+		syscall
+		j exit
+	
+first_arg_is_P:
+		#This comment just outputs 'P'-just checking
+		#li $v0, 11
+		#move $a0, $t1
+		#syscall
+		
+		lw $t0, num_args #$t0 now contains the number of arguments in total
+		li $t1, 2 #$t1 now contains number 2
+		bne $t0, $t1, throw_argument_error #if the number of args is not 2, throw the argument error
+		
+		lw $t0, addr_arg1 #$t0 contains the stri
+jnlp file truncated after 10K
